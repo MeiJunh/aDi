@@ -1,6 +1,7 @@
 package config
 
 import (
+	"aDi/config/dynamic"
 	"aDi/log"
 	"unsafe"
 )
@@ -15,6 +16,8 @@ var (
 
 // DynamicConf 动态配置列表
 type DynamicConf struct {
+	AppId     string `json:"appId"`
+	AppSecret string `json:"appSecret"`
 }
 
 // Init 配置初始化
@@ -28,12 +31,12 @@ func Init() {
 
 // InitDynamicConf 初始化动态配置信息
 func InitDynamicConf() {
-	source, err := NewSQLConfSourceByURL(GetSConfDsn())
+	source, err := dynamic.NewSQLConfSourceByURL(GetSConfDsn())
 	if err != nil {
 		log.Errorf("new sql source fail,err:%s", err.Error())
 		return
 	}
-	watchList := []*MCWatchInfo{
+	watchList := []*dynamic.MCWatchInfo{
 		{
 			Def: mDConf,
 			PT:  &mDcPt,
@@ -41,7 +44,7 @@ func InitDynamicConf() {
 		},
 	}
 	// service name设置为comm
-	mc, err := NewConfig(source, watchList, AddServiceName("aDi"))
+	mc, err := dynamic.NewConfig(source, watchList, dynamic.AddServiceName("aDi"))
 	if err != nil {
 		log.Errorf("new config fail,err:%s", err.Error())
 		return

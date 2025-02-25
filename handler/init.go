@@ -1,26 +1,20 @@
 package handler
 
 import (
+	"aDi/handler/loginApi"
+	"aDi/handler/noLoginApi"
 	"github.com/gin-gonic/gin"
 )
 
-// MCheckHandlerImp handler模版 -- 需要进行cookie校验
-type MCheckHandlerImp struct {
-}
-
-// MNoCheckHandlerImp handler模版 -- 不需要进行校验
-type MNoCheckHandlerImp struct {
-}
-
 // MCheckHandler handler实例
-var MCheckHandler *MCheckHandlerImp
-var MNoCheckHandler *MNoCheckHandlerImp
+var MCheckHandler *loginApi.LoginHandlerImp
+var MNoCheckHandler *noLoginApi.NoLoginHandlerImp
 
 // Init 路由注册,服务启动
 func Init() {
 	// 模版实例初始化
-	MCheckHandler = &MCheckHandlerImp{}
-	MNoCheckHandler = &MNoCheckHandlerImp{}
+	MCheckHandler = &loginApi.LoginHandlerImp{}
+	MNoCheckHandler = &noLoginApi.NoLoginHandlerImp{}
 	// 初始化路由
 	InitRoute()
 }

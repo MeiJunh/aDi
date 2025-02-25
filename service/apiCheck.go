@@ -1,98 +1,53 @@
 package service
 
 import (
-	"errors"
+	"aDi/log"
 	"github.com/golang-jwt/jwt/v5"
-	"net/http"
 	"time"
 )
 
 // Secret key used for signing the JWT
 var jwtKey = []byte("your_secret_key")
 
-// Claims structure
-type Claims struct {
-	Username string `json:"username"`
-	jwt.RegisteredClaims
-}
-
-// GenerateJWT unction to generate a new JWT token
-func GenerateJWT(username string) (string, error) {
-	expirationTime := time.Now().Add(5 * time.Minute)
-	claims := &Claims{
-		Username: username,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expirationTime),
-		},
+// GenerateToken 获取token
+func GenerateToken(userID int64) (tokenStr string, expireAt int64, err error) {
+	expireAt = time.Now().Add(24 * time.Hour).Unix()
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"exp":     expireAt,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
+	tokenStr, err = token.SignedString(jwtKey)
 	if err != nil {
-		return "", err
+		log.Errorf("jwt sign err: %s", err.Error())
+		return "", expireAt, err
 	}
-
-	return tokenString, nil
+	return tokenStr, expireAt, err
 }
 
-// ValidateJWT Middleware to validate JWT token
-func ValidateJWT(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		c, err := r.Cookie("token")
-		if err != nil {
-			if errors.Is(err, http.ErrNoCookie) {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		tokenStr := c.Value
-		claims := &Claims{}
-		token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
-			return jwtKey, nil
-		})
-
-		if err != nil {
-			if errors.Is(err, jwt.ErrSignatureInvalid) {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		if !token.Valid {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		next.ServeHTTP(w, r)
+// ValidateToken token校验
+func ValidateToken(tokenString string) (int64, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
 	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID := int64(claims["user_id"].(float64))
+		return userID, nil
+	}
+
+	return 0, jwt.ErrInvalidKey
 }
 
-// Login Handler for login, generates a JWT token
-func Login(w http.ResponseWriter, r *http.Request) {
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-
-	// For demonstration purposes, we use hardcoded username and password
-	if username != "user" || password != "password" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
+// GetSignAppKey 获取参数签名的app key -- 目前直接使用open id后16为作为app key
+func GetSignAppKey(openId string) string {
+	if len(openId) <= 16 {
+		return openId
 	}
-
-	tokenString, err := GenerateJWT(username)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	http.SetCookie(w, &http.Cookie{
-		Name:    "token",
-		Value:   tokenString,
-		Expires: time.Now().Add(5 * time.Minute),
-	})
+	return openId[len(openId)-16:]
 }
