@@ -29,5 +29,6 @@ var (
 	ErrINoAuth       = CodeMsg{Code: 21, Msg: "没有权限"}          // 没有权限
 	ErrIGetAuthFail  = CodeMsg{Code: 22, Msg: "获取权限失败"}        // 获取权限失败
 	ErrINotFound     = CodeMsg{Code: http.StatusNotFound, Msg: "404 page not found"}
+	ErrINoLogin      = CodeMsg{Code: 108, Msg: "未进行登录，请先登录"} // 注册前需要先进性登录
 	ErrInvalidToken  = CodeMsg{Code: 109, Msg: "无效token"}
 )

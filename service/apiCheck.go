@@ -44,8 +44,8 @@ func ValidateToken(tokenString string) (int64, error) {
 	return 0, jwt.ErrInvalidKey
 }
 
-// GetSignAppKey 获取参数签名的app key -- 目前直接使用open id后16为作为app key
-func GetSignAppKey(openId string) string {
+// GetSignApiKey 获取参数签名的api key -- 目前直接使用open id后16为作为app key
+func GetSignApiKey(openId string) string {
 	if len(openId) <= 16 {
 		return openId
 	}

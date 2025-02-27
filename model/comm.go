@@ -16,3 +16,11 @@ func (r *BaseRsp) Generate(errInfo CodeMsg) *BaseRsp {
 	r.WriteMsg(errInfo)
 	return r
 }
+
+// Switch 开关
+type Switch int32
+
+const (
+	SwitchOff = Switch(0) // 关闭
+	SwitchOn  = Switch(1) // 打开
+)
