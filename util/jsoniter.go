@@ -14,3 +14,13 @@ func MarshalToStringWithOutErr(v interface{}) string {
 	}
 	return info
 }
+
+// MarshalWithoutErr 不返回错误的marshal
+func MarshalWithoutErr(v interface{}) []byte {
+	info, err := jsoniter.Marshal(v)
+	if err != nil {
+		log.Errorf("marshal fail,err:%s", err.Error())
+		return info
+	}
+	return info
+}

@@ -5,4 +5,5 @@ const (
 	DaySecond    = 86400 // 以秒为单位的一天时间
 	HourSecond   = 3600  // 一小时对应的秒
 	MinuteSecond = 60    // 一分钟对应的秒
+	DayNumFormat = "20060102"
 )

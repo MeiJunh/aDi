@@ -2,6 +2,7 @@
 /bin/
 /pkg/
 /out/
+/conf/
 
 # Binaries for programs and plugins
 *.exe

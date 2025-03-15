@@ -2,14 +2,17 @@ package config
 
 import (
 	"aDi/log"
+	"aDi/model"
 	"fmt"
 	jsoniter "github.com/json-iterator/go"
 	"io"
 	"os"
 )
 
+// StaticConf 静态配置
 type StaticConf struct {
-	StaticDBDsn string `json:"static_db_dsn"` // 静态db dsn配置
+	StaticDBDsn string                               `json:"staticDbDsn"` // 静态db dsn配置
+	CosConfMap  map[model.CosRegion]*model.CosConfig `json:"cosConfMap"`
 }
 
 // InitStaticConf 初始化静态配置信息

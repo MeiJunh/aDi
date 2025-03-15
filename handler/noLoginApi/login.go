@@ -114,7 +114,7 @@ func (n *NoLoginHandlerImp) Register(c *gin.Context) (rsp model.BaseRsp) {
 		return
 	}
 	// 进行用户注册 -- 向用户表中插入数据
-	userInfo := &model.UserInfo{
+	userInfo := &model.DBUserInfo{
 		Nick:       "未命名",
 		Age:        20,
 		Sex:        "男",

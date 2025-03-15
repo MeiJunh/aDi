@@ -18,6 +18,14 @@ var (
 type DynamicConf struct {
 	AppId     string `json:"appId"`
 	AppSecret string `json:"appSecret"`
+	AiConf    AiConf `json:"aiConf"` // ai配置
+}
+
+// AiConf ai相关配置
+type AiConf struct {
+	ApiUrl      string `json:"apiUrl"`      // 请求地址url
+	Secret      string `json:"secret"`      // 接口请求对应的secret
+	TextAiModel string `json:"textAiModel"` // 文本ai模型名
 }
 
 // Init 配置初始化
