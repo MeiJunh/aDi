@@ -1,6 +1,9 @@
 package config
 
-import "sync/atomic"
+import (
+	"aDi/model"
+	"sync/atomic"
+)
 
 // GetSConfDsn 返回静态配置dsn
 func GetSConfDsn() string {
@@ -28,4 +31,41 @@ func GetAppSecret() string {
 		return ""
 	}
 	return DC().AppSecret
+}
+
+// GetCosConfMap 获取cos conf
+func GetCosConfMap(region model.CosRegion) (conf *model.CosConfig) {
+	if SConf == nil || SConf.CosConfMap == nil {
+		return conf
+	}
+	return SConf.CosConfMap[region]
+}
+
+func GetAiApiUrl() string {
+	if DC() == nil {
+		return ""
+	}
+	return DC().AiConf.ApiUrl
+}
+
+func GetAiSecret() string {
+	if DC() == nil {
+		return ""
+	}
+	return DC().AiConf.Secret
+}
+
+func GetAiTextAiModel() string {
+	if DC() == nil {
+		return ""
+	}
+	return DC().AiConf.TextAiModel
+}
+
+// GetWxPayConf 获取微信支付配置
+func GetWxPayConf() WxPayConf {
+	if SConf == nil {
+		return WxPayConf{}
+	}
+	return SConf.WxPayConf
 }

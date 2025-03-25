@@ -13,8 +13,8 @@ var jwtKey = []byte("your_secret_key")
 func GenerateToken(userID int64) (tokenStr string, expireAt int64, err error) {
 	expireAt = time.Now().Add(24 * time.Hour).Unix()
 	claims := jwt.MapClaims{
-		"user_id": userID,
-		"exp":     expireAt,
+		"userId": userID,
+		"exp":    expireAt,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -37,7 +37,7 @@ func ValidateToken(tokenString string) (int64, error) {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userID := int64(claims["user_id"].(float64))
+		userID := int64(claims["userId"].(float64))
 		return userID, nil
 	}
 

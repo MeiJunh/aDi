@@ -2,7 +2,10 @@
 /bin/
 /pkg/
 /out/
-
+/conf/
+deploy.md
+*.zip
+*.pem
 # Binaries for programs and plugins
 *.exe
 *.dll

@@ -18,6 +18,26 @@ var (
 type DynamicConf struct {
 	AppId     string `json:"appId"`
 	AppSecret string `json:"appSecret"`
+	AiConf    AiConf `json:"aiConf"` // ai配置
+}
+
+// WxPayConf 微信支付配置
+type WxPayConf struct {
+	AppId                              string `json:"appId"`                              // 小程序id
+	WxDirectMchId                      string `json:"WxDirectMchId,omitempty"`            // 直连商户微信支付商户ID
+	WxDirectMchCertificateSerialNumber string `json:"WxDirectMchCertificateSerialNumber"` // 直连商户证书序列号
+	WxDirectAPIv3Key                   string `json:"WxDirectAPIv3Key"`                   // 直连商户微信支付APIv3密钥
+	WxDirectApiClientKey               string `json:"WxDirectApiClientKey"`               // 直连商户微信支付证书密钥pem格式（apiclient_key.pem）
+	WxPublicKeyStr                     string `json:"WxPublicKeyStr"`                     // 直连商户微信支付证书微信支付公钥
+	WxPublicKeyId                      string `json:"WxPublicKeyId"`                      // 公钥ID
+	WxDirectPayNotify                  string `json:"WxDirectPayNotify"`                  // 微信支付回调地址
+}
+
+// AiConf ai相关配置
+type AiConf struct {
+	ApiUrl      string `json:"apiUrl"`      // 请求地址url
+	Secret      string `json:"secret"`      // 接口请求对应的secret
+	TextAiModel string `json:"textAiModel"` // 文本ai模型名
 }
 
 // Init 配置初始化

@@ -15,7 +15,7 @@ func CheckDynamicRouter(controller interface{}) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// Extract the path part from the request URL
 		// Assuming the path is something like "/api/hello" -> "hello"
-		pathParts := strings.Split(ctx.Request.URL.Path, "/")
+		pathParts := strings.Split(strings.Trim(ctx.Request.URL.Path, "/"), "/")
 		if len(pathParts) < 2 {
 			log.Errorf("err path:%s", ctx.Request.URL.Path)
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "Invalid path"})

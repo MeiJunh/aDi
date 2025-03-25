@@ -24,5 +24,6 @@ func InitRoute() {
 	// 自动路由
 	router.Any("/api/*action", CheckDynamicRouter(MCheckHandler))
 	router.Any("/apiN/*action", NoCheckDynamicRouter(MNoCheckHandler))
+	router.Any("/pay/wxCallBack", noLoginApi.MchWxPayNotify)
 	router.Run(":18888")
 }
