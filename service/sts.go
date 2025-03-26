@@ -52,7 +52,7 @@ func GetTencentSTSByRegion(region model.CosRegion, uid, durationSeconds int64) (
 	cInfo := config.GetCosConfMap(region)
 	cdnHost = cInfo.CDNHost
 	dirList = []string{fmt.Sprintf("yq/%d/%s", uid, time.Now().Format(util.DayNumFormat))}
-	policy := GetTencentCosPoliceByRegion(region, dirList)
+	policy := GetTencentCosPoliceByRegion(cInfo.ResourceFormat, dirList)
 	opt := &sts.CredentialOptions{
 		DurationSeconds: durationSeconds,
 		Region:          string(region),
@@ -68,11 +68,11 @@ func GetTencentSTSByRegion(region model.CosRegion, uid, durationSeconds int64) (
 	return result, cdnHost, dirList, nil
 }
 
-func GetTencentCosPoliceByRegion(region model.CosRegion, dirList []string) *sts.CredentialPolicy {
+func GetTencentCosPoliceByRegion(resourceFormat string, dirList []string) *sts.CredentialPolicy {
 	resourceList := make([]string, 0, len(dirList))
 
 	for _, v := range dirList {
-		resourceList = append(resourceList, fmt.Sprintf("/%s/*", v))
+		resourceList = append(resourceList, fmt.Sprintf(resourceFormat, v))
 	}
 
 	return &sts.CredentialPolicy{

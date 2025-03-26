@@ -8,14 +8,14 @@ const (
 
 // CosConfig cos配置信息
 type CosConfig struct {
-	AccessKey      string
-	AccessSecret   string
-	BucketName     string
-	Endpoint       string
-	ResourceFormat string
-	RoleArn        string
-	CDNHost        string
-	HostName       string
+	AccessKey      string `json:"accessKey"`
+	AccessSecret   string `json:"accessSecret"`
+	BucketName     string `json:"bucketName"`
+	Endpoint       string `json:"endpoint"`
+	ResourceFormat string `json:"resourceFormat"`
+	RoleArn        string `json:"roleArn"`
+	CDNHost        string `json:"cdnHost"`
+	HostName       string `json:"hostName"`
 }
 
 // OssSTSInfo sts回参信息
