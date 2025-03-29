@@ -11,6 +11,7 @@ deploy.md
 *.dll
 *.so
 *.dylib
+lingl
 
 # Test binary, build with `go test -c`
 *.test

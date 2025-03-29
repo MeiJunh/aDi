@@ -75,6 +75,40 @@ func GetConversationConfByUid(uid, digitalUid int64) (info *model.DbConversation
 	return info, err
 }
 
+// GetOrAddConversationConfId 获取或者新增对话配置id
+func GetOrAddConversationConfId(uid, digitalUid int64) (cID int64) {
+	info, err := GetConversationConfByUid(uid, digitalUid)
+	if err != nil {
+		log.Errorf("get conversation conf id fail,err:%s", err.Error())
+		return cID
+	}
+	if info == nil || info.ID <= 0 {
+		// 如果不存在则进行新增
+		cID, err = InitConversationConf(uid, digitalUid)
+		if err != nil {
+			log.Errorf("init conversation conf fail,err:%s", err.Error())
+			return cID
+		}
+		return cID
+	}
+	return info.ID
+}
+
+// InitConversationConf 初始化聊天配置
+func InitConversationConf(uid, digitalUid int64) (id int64, err error) {
+	result, err := dbClient.Exec("insert into t_conversation_conf (uid, digital_uid, chat_conf)", uid, digitalUid, util.MarshalToStringWithOutErr(&model.BuyChatNumReq{}))
+	if err != nil {
+		log.Errorf("init conversation conf fail,err:%s", err.Error())
+		return id, err
+	}
+	id, err = result.LastInsertId()
+	if err != nil {
+		log.Errorf("init conversation conf fail,err:%s", err.Error())
+		return id, err
+	}
+	return id, err
+}
+
 // DecreaseConNum 扣减会话聊天次数
 func DecreaseConNum(conConfId int64) (effect int64) {
 	result, err := dbClient.Exec("update t_conversation_conf set chat_use_num = chat_use_num + 1 where id = ? and chat_total_num > chat_use_num", conConfId)

@@ -13,12 +13,12 @@ import (
 )
 
 var (
-	cosCliMap sync.Map
+	cosStsCliMap = sync.Map{}
 )
 
-// getCosClient 获取cos client
-func getCosClient(regionId model.CosRegion) (*sts.Client, error) {
-	cli, ok := cosCliMap.Load(regionId)
+// getCosStsClient 获取cos client
+func getCosStsClient(regionId model.CosRegion) (*sts.Client, error) {
+	cli, ok := cosStsCliMap.Load(regionId)
 	if ok {
 		return cli.(*sts.Client), nil
 	}
@@ -34,13 +34,13 @@ func getCosClient(regionId model.CosRegion) (*sts.Client, error) {
 		return nil, errors.New("get oss sts client fail")
 	}
 	log.Infof("get oss sts client success, region:%s, accessKey:%s, accessSecret:%s", regionId, cInfo.AccessKey, cInfo.AccessSecret)
-	cosCliMap.Store(regionId, cli)
+	cosStsCliMap.Store(regionId, cli)
 	return cli.(*sts.Client), nil
 }
 
 // GetTencentSTSByRegion 获取腾讯cos的sts信息
 func GetTencentSTSByRegion(region model.CosRegion, uid, durationSeconds int64) (result *sts.CredentialResult, cdnHost string, dirList []string, err error) {
-	c, err := getCosClient(region)
+	c, err := getCosStsClient(region)
 	if err != nil {
 		log.Errorf("get cos sts client fail, region:%s, err:%s", region, err.Error())
 		return result, cdnHost, nil, err

@@ -11,6 +11,14 @@ func (r *BaseRsp) WriteMsg(errInfo CodeMsg) {
 	r.CodeMsg = errInfo
 }
 
+// WriteCodeMsg 写数据 -- 出错时不需要写data返回值
+func (r *BaseRsp) WriteCodeMsg(errCode ErrCode, errMsg string) {
+	r.CodeMsg = CodeMsg{
+		Code: errCode,
+		Msg:  errMsg,
+	}
+}
+
 // Generate 赋值并且返回
 func (r *BaseRsp) Generate(errInfo CodeMsg) *BaseRsp {
 	r.WriteMsg(errInfo)

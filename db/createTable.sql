@@ -187,6 +187,7 @@ CREATE TABLE IF NOT EXISTS t_game (
     `re_claim_num` int(11) NOT NULL DEFAULT 0 COMMENT '红包被领取的数量',
     `answer_list_str` TEXT NOT NULL COMMENT '答案信息',
     `state` int(11) NOT NULL DEFAULT 0 COMMENT '游戏状态',
+    `version` int(11) NOT NULL DEFAULT 0 COMMENT '版本号',
     `create_time`    datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_time`    datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY `idx_uid` (`uid`)
@@ -228,3 +229,43 @@ CREATE TABLE `sys_config` (
      PRIMARY KEY (`id`),
      UNIQUE KEY `uk_sc_configKey` (`config_key`)
 ) ENGINE=InnoDB AUTO_INCREMENT=185 DEFAULT CHARSET=utf8mb4 COMMENT='系统配置';
+
+------ 游戏轮次记录表
+CREATE TABLE IF NOT EXISTS t_game_play_record (
+    `id` INT PRIMARY KEY AUTO_INCREMENT,
+    `uid` bigint(20) NOT NULL DEFAULT 0 COMMENT 'uid',
+    `game_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '游戏id',
+    `input` VARCHAR(1024) NOT NULL DEFAULT '' COMMENT '输入 -- 用户的回答',
+    `output` VARCHAR(1024) NOT NULL DEFAULT '' COMMENT '输出结果',
+    `result_state` int(11) NOT NULL DEFAULT 0 COMMENT '游戏结果1:错误,2:正确',
+    `create_time`    datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time`    datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY `idx_uid_game_id` (`uid`,`game_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='游戏轮次记录表';
+
+------ 资金池数据
+CREATE TABLE IF NOT EXISTS t_funding_pool (
+    `id` INT PRIMARY KEY AUTO_INCREMENT,
+    `uid` bigint(20) NOT NULL DEFAULT 0 COMMENT 'uid',
+    `pool_type` int(11) NOT NULL DEFAULT 1 COMMENT '资金池类型:1:数字人,2:红包',
+    `all_total_amount` bigint(20) NOT NULL DEFAULT 0 COMMENT '一直以来的总收入 -- 单位分',
+    `all_withdraw_amount` bigint(20) NOT NULL DEFAULT 0 COMMENT '一直以来被提现的金额 -- 单位分',
+    `cur_total_amount` bigint(20) NOT NULL DEFAULT 0 COMMENT '当前资金 -- 单位分',
+    `create_time`    datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time`    datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uq_uid_type` (`uid`,`pool_type`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资金池数据';
+
+------ 资金池记详情
+CREATE TABLE IF NOT EXISTS t_funding_pool_detail (
+    `id` INT PRIMARY KEY AUTO_INCREMENT,
+    `uid` bigint(20) NOT NULL DEFAULT 0 COMMENT 'uid',
+    `pool_type` int(11) NOT NULL DEFAULT 1 COMMENT '资金池类型:1:数字人,2:红包',
+    `trade_no` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '业务订单号--虚拟的',
+    `trade_type` int(11) NOT NULL DEFAULT 1 COMMENT '交易类型,1:进账,2:出账',
+    `real_trade_no` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '业务订单号--真实的,用户看不到',
+    `amount` bigint(20) NOT NULL DEFAULT 0 COMMENT '金额 -- 单位分',
+    `create_time`    datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time`    datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uq_uid_type_trade_no` (`uid`,`pool_type`,`trade_no`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资金池记详情';

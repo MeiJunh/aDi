@@ -154,7 +154,7 @@ func RefreshTokenFromWechat() (token string, expireAt int64, err error) {
 	}
 	if tokenRsp.ErrCode != 0 {
 		rspStr := util.MarshalToStringWithOutErr(tokenRsp)
-		log.Errorf("get access token fail,rsp:%s", tokenRsp)
+		log.Errorf("get access token fail,rsp:%s", rspStr)
 		return token, expireAt, fmt.Errorf("wx response is no sucess,rsp:%s", rspStr)
 	}
 	return tokenRsp.AccessToken, int64(tokenRsp.ExpiresIn), nil

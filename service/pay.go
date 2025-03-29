@@ -15,8 +15,6 @@ import (
 	"github.com/wechatpay-apiv3/wechatpay-go/core/option"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/partnerpayments/jsapi"
 	"github.com/wechatpay-apiv3/wechatpay-go/utils"
-	"math/rand"
-	"strconv"
 	"time"
 )
 
@@ -118,38 +116,7 @@ func WxMchJsapi(ctx context.Context, input *model.UnifiedOrderReq) (order *model
 
 // GenOutTradeNo 生成的微信内部订单号
 func GenOutTradeNo() (tradeNo string) {
-	tradeNoPart := "WX"
-	dateStr := getTradeNoDatePart()
-	timeStr := getTradeNoNanoTimePart()
-	tradeNo = dateStr + tradeNoPart + timeStr
-	tradeNo += getTradeNoNoncePart(32 - len(tradeNo)) // 保有32的长度
-	return tradeNo
-}
-
-func getTradeNoDatePart() string {
-	dateStr := time.Now().Format("20060102150405")
-	return dateStr[2:]
-}
-
-func getTradeNoNanoTimePart() string {
-	nanosecond := time.Now().Nanosecond()
-	nanosecondStr := strconv.Itoa(nanosecond)
-	if len(nanosecondStr) >= 5 {
-		return nanosecondStr[:5]
-	}
-	for i := len(nanosecondStr); i < 5; i++ {
-		nanosecondStr = "0" + nanosecondStr
-	}
-	return nanosecondStr
-}
-
-func getTradeNoNoncePart(n int) string {
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(b)
+	return util.GenOutTradeNo("WX")
 }
 
 func getWxOrderExpireTime(min string) *time.Time {
@@ -211,7 +178,7 @@ func DealCharNumBuy(order *model.DbTPayCenter) {
 		log.Errorf("deal char num buy fail,err:%s", err.Error())
 		return
 	}
-	log.Debugf("deal char num buy success,trade no:%s,effect：%s", order.TradeNo, effect)
+	log.Debugf("deal char num buy success,trade no:%s,effect：%d", order.TradeNo, effect)
 	return
 }
 

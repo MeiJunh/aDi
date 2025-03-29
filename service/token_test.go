@@ -6,7 +6,7 @@ import (
 )
 
 func TestGenerateToken(t *testing.T) {
-	a, err := GenerateToken(1234354)
+	a, _, err := GenerateToken(1234354)
 	log.Debug(a, err)
 	//
 }

@@ -49,3 +49,16 @@ func CopyGetRequestBody(request *http.Request) []byte {
 	request.Body = io.NopCloser(bytes.NewBuffer(body))
 	return body
 }
+
+// InSliceStr 是否在列表中
+func InSliceStr(s []string, v string) bool {
+	if s == nil {
+		return false
+	}
+	for _, value := range s {
+		if value == v {
+			return true
+		}
+	}
+	return false
+}

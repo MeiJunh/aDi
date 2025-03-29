@@ -28,7 +28,7 @@ func GetUserAllInfo(uid int64) (userAllInfo *model.UserAllInfo, err error) {
 	// 获取用户信息
 	userInfo, err := dao.GetUserInfoByUid(uid)
 	if err != nil {
-		log.Error("get user info fail,uid:%d,err:%s", uid, err.Error())
+		log.Errorf("get user info fail,uid:%d,err:%s", uid, err.Error())
 		return userAllInfo, err
 	}
 

@@ -3,7 +3,7 @@ package model
 type CosRegion string
 
 const (
-	CosGZ = CosRegion("GZ")
+	CosSH = CosRegion("ap-shanghai")
 )
 
 // CosConfig cos配置信息

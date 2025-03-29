@@ -101,34 +101,57 @@ func (l *LoginHandlerImp) GetGamePlayListByShareCode(c *gin.Context) (rsp model.
 		rsp.WriteMsg(model.ErrIInvalidParam)
 		return
 	}
-	// 根据分享码拆分出游戏id
-	dUid, pOpenId, shareType, gameId := service.IdShareCodeSplit(shareCode)
-	if shareType != service.STGame {
-		rsp.WriteMsg(model.CodeMsg{
-			Code: model.ECBan,
-			Msg:  "该邀请码不是游戏邀请码",
-		})
-		return
-	}
-	_, errCode, errMsg := service.ShareCodeCheck(dUid, pOpenId)
-	if errCode != model.ErrCodeSuccess {
-		rsp.WriteMsg(model.CodeMsg{Code: errCode, Msg: errMsg})
-		return
-	}
-	// 查看该用户与这个游戏的对话记录
-	dao.GetGameById(gameId)
-	// 查看该游戏的当前状态 --是否被删除了,是否没有红包了，以及游戏的开场白等信息
-	rsp.Data = &model.GamePlayInfo{
-		GameName:    "",
-		Prologue:    "",
-		ChatList:    nil,
-		GameState:   0,
-		DigitalInfo: nil,
-	}
+	// 根据分享码拆分出游戏id并且获取游戏信息
+	_, rsp.Data, rsp.Code, rsp.Msg = service.GetGameInfoByShareCode(uid, shareCode)
 	return
 }
 
-// 根据分享码与游戏聊天
+// ChatWithGame 根据分享码与游戏聊天
+func (l *LoginHandlerImp) ChatWithGame(c *gin.Context) (rsp model.BaseRsp) {
+	req := &model.ChatWithGameReq{}
+	uid := comm.GetUidFromCon(c)
+	defer util.TimeCost("ChatWithGame", req, &rsp.Code, strconv.FormatInt(uid, 10))()
+	// 参数解析
+	_, err := comm.ReadBodyFromGin(c, req)
+	if err != nil {
+		log.Errorf("read from body fail,err:%s", err.Error())
+		rsp.WriteMsg(model.ErrIParse)
+		return
+	}
+	if uid <= 0 || req.ShareCode == "" || req.Input == "" {
+		rsp.WriteMsg(model.ErrIInvalidParam)
+		return
+	}
+	// 根据分享码获取对应的游戏信息
+	gameInfo, gamePlayInfo, errCode, errMsg := service.GetGameInfoByShareCode(uid, req.ShareCode)
+	if errCode != model.ErrCodeSuccess {
+		rsp.WriteCodeMsg(errCode, errMsg)
+		log.Errorf("get game info fail,err:%s", err.Error())
+		return
+	}
+	// 如果当前游戏的状态不是正常 -- 则直接返回
+	if gamePlayInfo.GameState != model.GSDefault {
+		errMsg = "当前游戏已经没有奖励，请更换对应的游戏邀请码重试"
+		switch gamePlayInfo.GameState {
+		case model.GSDel: // 被删除
+			errMsg = "当前游戏已被删除"
+		case model.GSNoRE: // 红包已经发完
+			errMsg = "当前游戏红包已经发完"
+		case model.GSExpire: // 游戏过期
+			errMsg = "当前游戏已过期"
+		case model.GSPlayOver: // 当前用户已经将该游戏玩完了
+			errMsg = "您当前所在游戏已经达到游戏次数上限"
+		case model.GSPlayWin: // 当前用户已经获得了该游戏的奖励
+			errMsg = "您已经获得了该游戏的奖励"
+		}
+		rsp.WriteCodeMsg(model.ECBan, errMsg)
+		return
+	}
+	// 添加游戏信息
+	errCode, errMsg = service.ChatWithGame(uid, req.Input, gameInfo)
+	rsp.WriteCodeMsg(errCode, errMsg)
+	return
+}
 
 // DelGame 删除游戏
 func (l *LoginHandlerImp) DelGame(c *gin.Context) (rsp model.BaseRsp) {
@@ -139,7 +162,28 @@ func (l *LoginHandlerImp) DelGame(c *gin.Context) (rsp model.BaseRsp) {
 		rsp.WriteMsg(model.ErrIInvalidParam)
 		return
 	}
-	//
-
+	// 获取游戏信息
+	gameInfo, err := dao.GetGameById(gameId)
+	if err != nil {
+		rsp.WriteMsg(model.ErrIDbFail)
+		log.Errorf("get game info fail,err:%s", err.Error())
+		return
+	}
+	if gameInfo == nil || gameInfo.Id <= 0 || gameInfo.State == model.GSDel {
+		// 游戏不存在或者游戏已经被删除则直接返回
+		return
+	}
+	if gameInfo.Uid != uid {
+		// 如果游戏不属于当前用户 -- 直接报错
+		rsp.WriteMsg(model.CodeMsg{Code: model.ECBan, Msg: "游戏不属于当前用户，请刷新重选"})
+		return
+	}
+	// 删除游戏
+	errCode, errMsg := service.DelGame(gameInfo)
+	if errCode != model.ErrCodeSuccess {
+		rsp.WriteMsg(model.CodeMsg{Code: errCode, Msg: errMsg})
+		log.Errorf("del game info fail,err code:%d,err msg:%s", errCode, errMsg)
+		return
+	}
 	return
 }

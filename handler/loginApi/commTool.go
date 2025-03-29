@@ -18,7 +18,7 @@ func (l *LoginHandlerImp) GetCosSts(c *gin.Context) (rsp model.BaseRsp) {
 		return
 	}
 	expireTime := int64(util.HourSecond)
-	cosInfo, cdnHost, dirList, err := service.GetTencentSTSByRegion(model.CosGZ, uid, expireTime)
+	cosInfo, cdnHost, dirList, err := service.GetTencentSTSByRegion(model.CosSH, uid, expireTime)
 	if err != nil {
 		rsp.WriteMsg(model.ErrIS2S)
 		log.Errorf("get cos sts err:%s", err.Error())
