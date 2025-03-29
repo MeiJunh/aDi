@@ -46,6 +46,7 @@ func GetChatAiReq(content string, historyList []*model.ChatMessage) (reqInfo *mo
 			},
 			PresencePenalty: -0.2,
 		},
+		Stream: true, // 设置开启流式返回
 	}
 }
 
@@ -61,7 +62,6 @@ func AiJsonContentGenerate(reqInfo *model.ALiAiReq, keyId int64, asyncInfo *mode
 	}
 	// 添加header
 	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("X-DashScope-SSE", "enable") // 设置开启流式返回
 	request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", config.GetAiSecret()))
 	response, err := (&http.Client{Timeout: time.Second * time.Duration(30)}).Do(request) // 默认30秒超时
 	if err != nil {
@@ -105,8 +105,7 @@ func AiJsonContentGenerate(reqInfo *model.ALiAiReq, keyId int64, asyncInfo *mode
 }
 
 /*
-中间数据 data:{"output":{"choices":[{"message":{"content":"✨","role":"assistant"},"finish_reason":"null"}]},"usage":{"total_tokens":192,"input_tokens":191,"output_tokens":1},"request_id":"72500730-0b9c-97d3-bbcc-44206f56826f"}
-结束数据 data:{"output":{"choices":[{"message":{"content":"\n日期：______","role":"assistant"},"finish_reason":"stop"}]},"usage":{"total_tokens":460,"input_tokens":191,"output_tokens":269},"request_id":"dc477ba7-cad3-97b3-9ebe-c2ad814bf2cf"}
+data: {"choices":[{"delta":{"content":"","role":"assistant"},"index":0,"logprobs":null,"finish_reason":null}],"object":"chat.completion.chunk","usage":null,"created":1743265691,"system_fingerprint":null,"model":"qwen-plus-2025-01-25","id":"chatcmpl-5606b696-0150-9406-bb20-06ac69b0ed5c"}
 */
 // ALiStreamContentGet 阿里模型流式文案信息获取
 func ALiStreamContentGet(stream string) (content string, usage *model.ALiOpenStreamUsage, hasFinish bool) {
@@ -119,14 +118,14 @@ func ALiStreamContentGet(stream string) (content string, usage *model.ALiOpenStr
 		return content, usage, hasFinish
 	}
 
-	info := &model.ALiOpenStream{}
+	info := &model.ALiStreamRsp{}
 	err := jsoniter.UnmarshalFromString(stream, info)
 	if err != nil {
 		log.Errorf("parse fail,info:")
 		return content, usage, hasFinish
 	}
 	if info.GetFinish() {
-		log.Debugf("request id:%s", info.GetRequestId())
+		log.Debugf("request id:%s", info.Id)
 	}
-	return info.GetContent(), info.GetUsage(), info.GetFinish()
+	return info.GetContent(), &model.ALiOpenStreamUsage{}, info.GetFinish()
 }

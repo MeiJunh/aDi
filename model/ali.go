@@ -5,6 +5,7 @@ type ALiAiReq struct {
 	Model      string        `json:"model"`      // 指定用于对话的通义千问模型名，目前可选择qwen-turbo、qwen-plus、qwen-max、qwen-max-0403、qwen-max-0107、qwen-max-1201和qwen-max-longcontext。
 	Messages   []*AiMessage  `json:"messages"`   // 文本信息
 	Parameters *AiParameters `json:"parameters"` // 视觉模型参数
+	Stream     bool          `json:"stream"`
 }
 
 // AiParameters 视觉模型参数
@@ -53,71 +54,68 @@ type ALiOpenStreamUsage struct {
 	OutputTokens int32 `json:"output_tokens"`
 }
 
-// {"output":{"choices":[{"message":{"content":"✨","role":"assistant"},"finish_reason":"null"}]},
-// "usage":{"total_tokens":192,"input_tokens":191,"output_tokens":1},"request_id":"72500730-0b9c-97d3-bbcc-44206f56826f"}
-// ALiOpenStream ali文案生成流式结果获取
-type ALiOpenStream struct {
-	Output    *ALiOpenOutput      `json:"output"`
-	Usage     *ALiOpenStreamUsage `json:"usage"`
-	RequestId string              `json:"request_id"`
+// ALiStreamRsp 阿里流式返回
+// {"choices":[{"delta":{"content":"","role":"assistant"},"index":0,"logprobs":null,"finish_reason":null}],"object":"chat.completion.chunk","usage":null,"created":1743265691,"system_fingerprint":null,"model":"qwen-plus-2025-01-25","id":"chatcmpl-5606b696-0150-9406-bb20-06ac69b0ed5c"}
+//
+//	{
+//	 "choices" : [ {
+//	   "finish_reason" : "stop",
+//	   "delta" : {
+//	     "content" : ""
+//	   },
+//	   "index" : 0,
+//	   "logprobs" : null
+//	 } ],
+//	 "object" : "chat.completion.chunk",
+//	 "usage" : null,
+//	 "created" : 1743265691,
+//	 "system_fingerprint" : null,
+//	 "model" : "qwen-plus-2025-01-25",
+//	 "id" : "chatcmpl-5606b696-0150-9406-bb20-06ac69b0ed5c"
+//	}
+type ALiStreamRsp struct {
+	Choices           []*ALiStreamChoice `json:"choices"`
+	Object            string             `json:"object"`
+	Usage             interface{}        `json:"usage"`
+	Created           int                `json:"created"`
+	SystemFingerprint interface{}        `json:"system_fingerprint"`
+	Model             string             `json:"model"`
+	Id                string             `json:"id"`
 }
 
-// ALiOpenOutput ali文案生成流式结果获取
-type ALiOpenOutput struct {
-	Choices []*ALiOpenStreamChoice `json:"choices"`
+type ALiStreamChoice struct {
+	FinishReason interface{}     `json:"finish_reason"`
+	Delta        *ALiStreamDelta `json:"delta"`
+	Index        int             `json:"index"`
 }
 
-// ALiOpenStreamChoice ali文案生成流式结果choice
-type ALiOpenStreamChoice struct {
-	Message      *AIOpenChatMessage `json:"message"`
-	FinishReason string             `json:"finish_reason"`
-}
-
-// AIOpenChatMessage ai智能助手文案生成中的message信息
-type AIOpenChatMessage struct {
-	Role    string `json:"role"`
+type ALiStreamDelta struct {
 	Content string `json:"content"`
 }
 
 // GetContent 获取文案
-func (a *ALiOpenStream) GetContent() string {
-	if a == nil || a.Output == nil || len(a.Output.Choices) <= 0 {
+func (a *ALiStreamRsp) GetContent() string {
+	if a == nil || a.Choices == nil || len(a.Choices) <= 0 {
 		return ""
 	}
 	content := ""
-	for i := range a.Output.Choices {
-		if a.Output.Choices[i].Message != nil {
-			content += a.Output.Choices[i].Message.Content
+	for i := range a.Choices {
+		if a.Choices[i].Delta != nil {
+			content += a.Choices[i].Delta.Content
 		}
 	}
 	return content
 }
 
 // GetFinish 获取是否结束
-func (a *ALiOpenStream) GetFinish() bool {
-	if a == nil || a.Output == nil || len(a.Output.Choices) <= 0 {
+func (a *ALiStreamRsp) GetFinish() bool {
+	if a == nil || a.Choices == nil || len(a.Choices) <= 0 {
 		return false
 	}
-	for i := range a.Output.Choices {
-		if a.Output.Choices[i].FinishReason == "stop" {
+	for i := range a.Choices {
+		if a.Choices[i].FinishReason == "stop" {
 			return true
 		}
 	}
 	return false
-}
-
-// GetUsage 获取用量
-func (a *ALiOpenStream) GetUsage() *ALiOpenStreamUsage {
-	if a == nil {
-		return nil
-	}
-	return a.Usage
-}
-
-// GetRequestId 获取RequestId
-func (a *ALiOpenStream) GetRequestId() string {
-	if a == nil {
-		return ""
-	}
-	return a.RequestId
 }
